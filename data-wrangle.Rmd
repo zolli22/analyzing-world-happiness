@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(tidyverse)
+```
+
+```{r}
 happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNMB7AQIJ672ORMVKL26OJ3H6")
 happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPLYRU2KWDDIGFKSCS6OJ3JU")
 happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNKJG7RFYHRUAMITURC6OJ3M4")
@@ -17,4 +21,97 @@ happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/ma
 happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNNCDOIVOFWIVMMOOP26OJ3PU")
 mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNMOS4SBJG3DTIMUUYK6OJ3QM")
 suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNLHXALZJ4XT3PTCI6S6OJ3SU")
+```
+
+```{r}
+
+lower_bound <- rep(NA, 158)
+upper_bound <- rep(NA, 158)
+
+happiness_2015 <- happiness_2015 %>%
+  mutate(year = 2015) %>%
+  select(1, 3, 4, 6:11, 13) %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 8,
+         generosity = 9,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+
+happiness_2016 <- happiness_2016 %>%
+  mutate(year = 2016) %>%
+  select(1, 3, 4:12, 14) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 6,
+         family = 7,
+         life_expectancy = 8,
+         freedom = 9,
+         trust_corruption = 10,
+         generosity = 11,
+         year = 12,
+         lower_whisker = 4,
+         upper_whisker = 5)
+  
+
+happiness_2017 <- happiness_2017 %>%
+  mutate(year = 2017) %>%
+  select(-12) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 6,
+         family = 7,
+         life_expectancy = 8,
+         freedom = 9,
+         trust_corruption = 10,
+         generosity = 11,
+         year = 12,
+         lower_whisker = 4,
+         upper_whisker = 5)
+
+lower_bound <- rep(NA, 156)
+upper_bound <- rep(NA, 156)
+
+happiness_2018 <- happiness_2018 %>%
+  mutate(year = 2018) %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 2,
+         happiness_rank = 1,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 9,
+         generosity = 8,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+
+happiness_2019 <- happiness_2019 %>%
+  mutate(year = 2019)  %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 2,
+         happiness_rank = 1,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 9,
+         generosity = 8,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+  
+happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_2017, happiness_2018, happiness_2019))
 ```
