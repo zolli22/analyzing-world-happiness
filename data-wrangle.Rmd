@@ -1,0 +1,20 @@
+---
+title: "Project 2"
+author: "Nat Rubin"
+date: "3/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNMB7AQIJ672ORMVKL26OJ3H6")
+happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPLYRU2KWDDIGFKSCS6OJ3JU")
+happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNKJG7RFYHRUAMITURC6OJ3M4")
+happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNNU3I7TF5JQKPQXAJK6OJ3OU")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNNCDOIVOFWIVMMOOP26OJ3PU")
+mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNMOS4SBJG3DTIMUUYK6OJ3QM")
+suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNLHXALZJ4XT3PTCI6S6OJ3SU")
+```
