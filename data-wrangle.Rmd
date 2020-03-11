@@ -23,7 +23,7 @@ mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Sta
 suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNLHXALZJ4XT3PTCI6S6OJ3SU")
 ```
 
-```{r}
+```{r happiness df}
 
 lower_bound <- rep(NA, 158)
 upper_bound <- rep(NA, 158)
@@ -114,4 +114,18 @@ happiness_2019 <- happiness_2019 %>%
          upper_whisker = 12)
   
 happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_2017, happiness_2018, happiness_2019))
+```
+
+```{r}
+
+suicide_death_rates <- suicide_death_rates %>%
+  select(-2) %>%
+  rename(sdr = 3)
+
+countries <- happiness %>%
+  left_join(mental_health_facilities, by = c("country" = "Country")) %>%
+  left_join(suicide_death_rates, by = c(c("country" = "Entity"),
+                                        c("year" = "Year")))
+  
+
 ```
