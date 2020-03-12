@@ -17,7 +17,7 @@ library(viridis)
 library(ggthemes)
 library(plotly)
 library(gganimate)
-install.packages("transformr")
+library(countrycode)
 ```
 
 ```{r}
@@ -143,7 +143,7 @@ world_map <- map_data("world")
 # merge map and countries data
 countries_map <- left_join(countries, world_map, by = c("country" = "region"))
 # create the static map colored with happiness scores
-country.map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
+happiness_map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
   geom_polygon(aes(fill = happiness_score), colour = "white") +
   scale_fill_viridis(direction = 1, option = "B") +
   theme_void() +
@@ -154,6 +154,36 @@ country.map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
         legend.text=element_text(size = 6)) +
   labs(fill = "happiness score")
 
-country.map
 
+
+```
+
+```{r}
+# create an animated map (unfinished, have to think about how to handle missing values)
+# maybe add more years???
+happiness_map +
+  transition_manual(year)
+
+
+```
+
+```{r}
+countries$continent <- countrycode(sourcevar = countries[, "country"],
+                            origin = "country.name",
+                            destination = "continent") 
+
+# manually assign the continent name to Kosovo
+countries[countries$country =="Kosovo", "continent"] <- "Europe"
+
+# create a scatterplot to visualize the relationship between happiness and suicide
+
+suicide_happiness <- countries %>% ggplot(aes(x = happiness_score, y = sdr, 
+                                           color = continent, frame = year, ids = country)) +
+  geom_point(aes(size = life_expectancy), alpha = 0.7) +
+  scale_x_log10() +
+  labs(x = "Happiness Score", y = "Suicide death rate per 100,000",
+       size = NULL, color = "Continent") +
+  theme_minimal() 
+
+ggplotly(suicide_happiness)
 ```
