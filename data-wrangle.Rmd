@@ -131,7 +131,8 @@ suicide_death_rates <- suicide_death_rates %>%
 countries <- happiness %>%
   left_join(mental_health_facilities, by = c("country" = "Country")) %>%
   left_join(suicide_death_rates, by = c(c("country" = "Entity"),
-                                        c("year" = "Year")))
+                                        c("year" = "Year"))) %>%
+  select(-13)
   
 ```
 
