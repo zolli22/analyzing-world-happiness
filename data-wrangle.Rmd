@@ -11,6 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(maps)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(plotly)
+library(gganimate)
+install.packages("transformr")
 ```
 
 ```{r}
@@ -117,7 +124,6 @@ happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_201
 ```
 
 ```{r}
-
 suicide_death_rates <- suicide_death_rates %>%
   select(-2) %>%
   rename(sdr = 3)
@@ -127,5 +133,26 @@ countries <- happiness %>%
   left_join(suicide_death_rates, by = c(c("country" = "Entity"),
                                         c("year" = "Year")))
   
+```
+
+
+```{r}
+# retrieve the world map data
+world_map <- map_data("world")
+# merge map and countries data
+countries_map <- left_join(countries, world_map, by = c("country" = "region"))
+# create the static map colored with happiness scores
+country.map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = happiness_score), colour = "white") +
+  scale_fill_viridis(direction = 1, option = "B") +
+  theme_void() +
+  theme(legend.direction = "vertical", 
+        legend.title.align = 0,
+        legend.key.size = unit(0.5, "cm"),
+        legend.title=element_text(size = 10), 
+        legend.text=element_text(size = 6)) +
+  labs(fill = "happiness score")
+
+country.map
 
 ```
