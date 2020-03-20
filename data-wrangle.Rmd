@@ -11,16 +11,25 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
+library(maps)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(plotly)
+library(gganimate)
+library(countrycode)
+library(gridExtra)
 ```
 
 ```{r}
-happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNMB7AQIJ672ORMVKL26OJ3H6")
-happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPLYRU2KWDDIGFKSCS6OJ3JU")
-happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNKJG7RFYHRUAMITURC6OJ3M4")
-happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNNU3I7TF5JQKPQXAJK6OJ3OU")
-happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNNCDOIVOFWIVMMOOP26OJ3PU")
-mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNMOS4SBJG3DTIMUUYK6OJ3QM")
-suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNLHXALZJ4XT3PTCI6S6OJ3SU")
+happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNJBOL4TOHNDMTCN2B26PZABE")
+happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPJDSBHOCDJ3XFEZGK6PZADI")
+happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNLSUG5QK23B6O6CWXS6PZAFA")
+happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNJIBN65O6CBRQRR2726PZAFW")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNO6U5A4PHJ3QJBMZTS6PZAGM")
+mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNOJDJM2QZZHRZY6XRC6PZAIA")
+suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNKAB4OYFH5KITURBOK6PZAJG")
+time_series_deaths <- read.csv("")
 ```
 
 ```{r happiness df}
@@ -117,7 +126,6 @@ happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_201
 ```
 
 ```{r}
-
 suicide_death_rates <- suicide_death_rates %>%
   select(-2) %>%
   rename(sdr = 3)
@@ -128,5 +136,84 @@ countries <- happiness %>%
                                         c("year" = "Year"))) %>%
   select(-13)
   
+```
+
+
+```{r}
+# retrieve the world map data
+world_map <- map_data("world")
+# merge map and countries data
+countries_map <- left_join(countries, world_map, by = c("country" = "region"))
+# create the static map colored with happiness scores
+happiness_map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = happiness_score), colour = "white") +
+  scale_fill_viridis(direction = 1, option = "B") +
+  theme_void() +
+  theme(legend.direction = "vertical", 
+        legend.title.align = 0,
+        legend.key.size = unit(0.5, "cm"),
+        legend.title=element_text(size = 10), 
+        legend.text=element_text(size = 6)) +
+  labs(fill = "happiness score")
+
+
+
+```
+
+```{r}
+# create an animated map (unfinished, have to think about how to handle missing values)
+# maybe add more years???
+happiness_map +
+  transition_manual(year)
+
+
+```
+
+```{r}
+countries$continent <- countrycode(sourcevar = countries[, "country"],
+                            origin = "country.name",
+                            destination = "continent") 
+
+# manually assign the continent name to Kosovo
+countries[countries$country =="Kosovo", "continent"] <- "Europe"
+
+# create a scatterplot to visualize the relationship between happiness and suicide
+
+suicide_happiness <- countries %>% ggplot(aes(x = happiness_score, y = sdr, 
+                                           color = continent, frame = year, ids = country)) +
+  geom_point(aes(size = life_expectancy), alpha = 0.7) +
+  scale_x_log10() +
+  labs(x = "Happiness Score", y = "Suicide death rate per 100,000",
+       size = NULL, color = "Continent") +
+  theme_minimal() 
+
+ggplotly(suicide_happiness)
+```
+
+```{r}
+#side-by-side comparison of mental health access versus happiness/suicide rate
+
+happiness_vs_health <- countries %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = happiness_score), na.rm = TRUE) +
+  geom_point(color = "darkorchid2") +
+  geom_smooth(method=lm, color = "darkorchid4") +
+  theme_bw() +
+  labs(x = "Mental Health Units in General Hospitals per 100,000",
+       y = "Happiness Score (2016)",
+       title = "Mental Health access versus Happiness Score")
+
+suicide_vs_health <- countries %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = sdr), na.rm = TRUE) +
+  geom_point(color = "royalblue2") +
+  geom_smooth(method=lm, color = "royalblue4") +
+  theme_bw() +
+  labs(x = "Mental Health Units in General Hospitals per 100,000",
+       y = "Suicide Death Rate (2016)",
+       title = "Mental Health access versus Suicide Death Rate")
+
+happiness_vs_health
+suicide_vs_health
 
 ```
