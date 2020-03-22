@@ -190,6 +190,16 @@ suicide_happiness <- countries %>% ggplot(aes(x = happiness_score, y = sdr,
 ggplotly(suicide_happiness)
 ```
 
+
+```{r warning=FALSE, message=FALSE}
+# create a scatterplot that shows the relationship between mental health facilities and happiness scores
+countries %>% ggplot(aes(x = happiness_score, y = Mental.hospitals..per.100.000.population.)) +
+  scale_y_log10() + 
+  scale_x_log10() + 
+  geom_jitter(alpha = 0.5, color = "#BC8F8F")
+```
+(we don't have to use this graph by the way I'm just curious about the log transformed relationship)
+
 ```{r}
 #side-by-side comparison of mental health access versus happiness/suicide rate
 
