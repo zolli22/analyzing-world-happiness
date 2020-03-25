@@ -236,19 +236,11 @@ top_bottom_2019_happiness<-happiness_2019 %>%
   pivot_longer(cols=c(family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
   mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands", "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
 
-ggplot(top_bottom_2019_happiness, mapping=aes(x=country, y=values, fill=category))+
-  geom_col(position="dodge", color="black", size=.25)+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
-  scale_x_discrete(labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  scale_fill_discrete(labels = c("Social support", "Freedom to make\n life choices", "Generosity", "Healthy life expectancy\n at birth", "Perceptions of \n corruption"))+
-  labs(x="Country (with rank)")
-
 ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country))+
   geom_col(position="dodge", color="black", size=0.25)+
   theme_bw()+
   scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
+  #theme(axis.text.x = element_text(angle = 270, hjust = 0))+
   scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "Generosity", "Healthy life\n expectancy\n at birth", "Perceptions\n of corruption"))+
   labs(x="Measurement Category")
 
