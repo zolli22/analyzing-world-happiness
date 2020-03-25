@@ -1,0 +1,256 @@
+---
+title: "Project 2"
+author: "Nat Rubin"
+date: "3/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(tidyverse)
+library(maps)
+library(ggplot2)
+library(viridis)
+library(ggthemes)
+library(plotly)
+library(gganimate)
+library(countrycode)
+library(gridExtra)
+```
+
+```{r}
+happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNJBOL4TOHNDMTCN2B26PZABE")
+happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPJDSBHOCDJ3XFEZGK6PZADI")
+happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNLSUG5QK23B6O6CWXS6PZAFA")
+happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNJIBN65O6CBRQRR2726PZAFW")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNO6U5A4PHJ3QJBMZTS6PZAGM")
+mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNOJDJM2QZZHRZY6XRC6PZAIA")
+suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNKAB4OYFH5KITURBOK6PZAJG")
+time_series_deaths <- read.csv("")
+```
+
+```{r happiness df}
+
+lower_bound <- rep(NA, 158)
+upper_bound <- rep(NA, 158)
+
+happiness_2015 <- happiness_2015 %>%
+  mutate(year = 2015) %>%
+  select(1, 3, 4, 6:11, 13) %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 8,
+         generosity = 9,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+
+happiness_2016 <- happiness_2016 %>%
+  mutate(year = 2016) %>%
+  select(1, 3, 4:12, 14) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 6,
+         family = 7,
+         life_expectancy = 8,
+         freedom = 9,
+         trust_corruption = 10,
+         generosity = 11,
+         year = 12,
+         lower_whisker = 4,
+         upper_whisker = 5)
+  
+
+happiness_2017 <- happiness_2017 %>%
+  mutate(year = 2017) %>%
+  select(-12) %>%
+  rename(country = 1,
+         happiness_rank = 2,
+         happiness_score = 3,
+         gdp = 6,
+         family = 7,
+         life_expectancy = 8,
+         freedom = 9,
+         trust_corruption = 10,
+         generosity = 11,
+         year = 12,
+         lower_whisker = 4,
+         upper_whisker = 5)
+
+lower_bound <- rep(NA, 156)
+upper_bound <- rep(NA, 156)
+
+happiness_2018 <- happiness_2018 %>%
+  mutate(year = 2018) %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 2,
+         happiness_rank = 1,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 9,
+         generosity = 8,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+
+happiness_2019 <- happiness_2019 %>%
+  mutate(year = 2019)  %>%
+  mutate(lower_bound = lower_bound, upper_bound = upper_bound) %>%
+  rename(country = 2,
+         happiness_rank = 1,
+         happiness_score = 3,
+         gdp = 4,
+         family = 5,
+         life_expectancy = 6,
+         freedom = 7,
+         trust_corruption = 9,
+         generosity = 8,
+         year = 10,
+         lower_whisker = 11,
+         upper_whisker = 12)
+  
+happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_2017, happiness_2018, happiness_2019))
+```
+
+```{r}
+suicide_death_rates <- suicide_death_rates %>%
+  select(-2) %>%
+  rename(sdr = 3)
+
+countries <- happiness %>%
+  left_join(mental_health_facilities, by = c("country" = "Country")) %>%
+  left_join(suicide_death_rates, by = c(c("country" = "Entity"),
+                                        c("year" = "Year"))) %>%
+  select(-13)
+  
+```
+
+
+```{r}
+# retrieve the world map data
+world_map <- map_data("world")
+# merge map and countries data
+countries_map <- left_join(countries, world_map, by = c("country" = "region"))
+# create the static map colored with happiness scores
+happiness_map <- ggplot(countries_map, aes(x = long, y = lat, group = group)) +
+  geom_polygon(aes(fill = happiness_score), colour = "white") +
+  scale_fill_viridis(direction = 1, option = "B") +
+  theme_void() +
+  theme(legend.direction = "vertical", 
+        legend.title.align = 0,
+        legend.key.size = unit(0.5, "cm"),
+        legend.title=element_text(size = 10), 
+        legend.text=element_text(size = 6)) +
+  labs(fill = "happiness score")
+
+
+
+```
+
+```{r}
+# create an animated map (unfinished, have to think about how to handle missing values)
+# maybe add more years???
+happiness_map +
+  transition_manual(year)
+
+
+```
+
+```{r}
+countries$continent <- countrycode(sourcevar = countries[, "country"],
+                            origin = "country.name",
+                            destination = "continent") 
+
+# manually assign the continent name to Kosovo
+countries[countries$country =="Kosovo", "continent"] <- "Europe"
+
+# create a scatterplot to visualize the relationship between happiness and suicide
+
+suicide_happiness <- countries %>% ggplot(aes(x = happiness_score, y = sdr, 
+                                           color = continent, frame = year, ids = country)) +
+  geom_point(aes(size = life_expectancy), alpha = 0.7) +
+  scale_x_log10() +
+  labs(x = "Happiness Score", y = "Suicide death rate per 100,000",
+       size = NULL, color = "Continent") +
+  theme_minimal() 
+
+ggplotly(suicide_happiness)
+```
+
+
+```{r warning=FALSE, message=FALSE}
+# create a scatterplot that shows the relationship between mental health facilities and happiness scores
+countries %>% ggplot(aes(x = happiness_score, y = Mental.hospitals..per.100.000.population.)) +
+  scale_y_log10() + 
+  scale_x_log10() + 
+  geom_jitter(alpha = 0.5, color = "#BC8F8F")
+```
+(we don't have to use this graph by the way I'm just curious about the log transformed relationship)
+
+```{r}
+#side-by-side comparison of mental health access versus happiness/suicide rate
+
+happiness_vs_health <- countries %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = happiness_score), na.rm = TRUE) +
+  geom_point(color = "darkorchid2") +
+  geom_smooth(method=lm, color = "darkorchid4") +
+  theme_bw() +
+  labs(x = "Mental Health Units in General Hospitals per 100,000",
+       y = "Happiness Score (2016)",
+       title = "Mental Health access versus Happiness Score")
+
+suicide_vs_health <- countries %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = sdr), na.rm = TRUE) +
+  geom_point(color = "royalblue2") +
+  geom_smooth(method=lm, color = "royalblue4") +
+  theme_bw() +
+  labs(x = "Mental Health Units in General Hospitals per 100,000",
+       y = "Suicide Death Rate (2016)",
+       title = "Mental Health access versus Suicide Death Rate")
+
+happiness_vs_health
+suicide_vs_health
+
+```
+```{r}
+#the weights of the different contributors to happiness and how they vary from the top five most happy countries to the five least happy countries
+
+top_bottom_2019_happiness<-happiness_2019 %>%
+  filter(happiness_rank <= 5 | happiness_rank >= 152) %>% #grab top and bottom 5 countries by happiness rank
+  pivot_longer(cols=c(family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
+  mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands", "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
+
+ggplot(top_bottom_2019_happiness, mapping=aes(x=country, y=values, fill=category))+
+  geom_col(position="dodge", color="black", size=.25)+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
+  scale_x_discrete(labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
+  scale_fill_discrete(labels = c("Social support", "Freedom to make\n life choices", "Generosity", "Healthy life expectancy\n at birth", "Perceptions of \n corruption"))+
+  labs(x="Country (with rank)")
+
+ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country))+
+  geom_col(position="dodge", color="black", size=0.25)+
+  theme_bw()+
+  scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
+  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
+  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "Generosity", "Healthy life\n expectancy\n at birth", "Perceptions\n of corruption"))+
+  labs(x="Measurement Category")
+
+
+```

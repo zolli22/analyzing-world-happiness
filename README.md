@@ -11,10 +11,4 @@ Are people happier/are suicide rates lower in places with better mental health a
 
 How have the rates changed throughout the years?
   -pick ten/15 countries? 
-<<<<<<< HEAD
-  
-For top 5 and bottom 5 countries (for one year):
-  -look at what things are important to them
-=======
->>>>>>> 4a5184fb1942d1da3d7b62d32d48526c44653a86
 
