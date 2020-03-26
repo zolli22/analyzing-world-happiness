@@ -41,7 +41,8 @@ suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statisti
 #time_series_deaths <- read.csv("")
 ```
 
-Walk the readers through the data wrangling processes (e.g. select relevant columns/rows, rename variables, etc.)
+First we needed to standardize the data across each year. We removed some columns, like region and the data authors's "dystopia" measure, which were unhelpful for our analysis. Some years included error bounds on the country's overall happiness score, while others didn't. Furthermore, the names and orders of the variables changed from year to year. We inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one dataset.
+
 ```{r warning=FALSE, message=FALSE}
 
 lower_bound <- rep(NA, 158)
@@ -135,7 +136,9 @@ happiness_2019 <- happiness_2019 %>%
 happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_2017, happiness_2018, happiness_2019))
 ```
 
-```{r}
+We then added suicide rates and mental health access to the dataset. Unfortunately, mental health access was only collected in one year, so that value remains constant across the years in each country.
+
+```{r warning=FALSE}
 suicide_death_rates <- suicide_death_rates %>%
   select(-2) %>%
   rename(sdr = 3)
@@ -148,6 +151,17 @@ countries <- happiness %>%
   
 ```
 
+So, how happy are countries overall? The World Happiness Report calculates each country's happiness score by using survey data. Citizens of each country are asked where their own life ranks on a scale of 1 to 10, with 10 being the best life possible and 0 being the worst life possible. Their responses are weighted to generate a national score. Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than in the least happy countries.
+
+```{r}
+happiness_summary <- countries %>%
+  summarize(mean(happiness_score), median(happiness_score), sd(happiness_score), min(happiness_score),  max(happiness_score))
+options(knitr.table.format = "html")
+kable(happiness_summary, digits = 2, 
+      col.names = c("Mean", "Median", 
+                    "Standard Dev.", "Minimum", "Maximum"),
+      caption = "Summary Statistics of National Happiness Scores")
+```
 ## A first look at the World Happiness Ranking
 
 Write a paragraph to explain the processes of averaging the happiness scores across the years and briefly discuss the most happy vs the least happy countries (maybe map another variable too?). 
@@ -206,15 +220,18 @@ ggplotly(suicide_happiness)
 
 ```{r warning=FALSE, message=FALSE}
 # create a scatterplot that shows the relationship between mental health facilities and happiness scores
-countries %>% ggplot(aes(x = happiness_score, y = Mental.hospitals..per.100.000.population.)) +
-  scale_y_log10() + 
-  scale_x_log10() + 
-  geom_jitter(alpha = 0.5, color = "#BC8F8F")
+# countries %>% ggplot(aes(x = happiness_score, y = Mental.hospitals..per.100.000.population.)) +
+ # scale_y_log10() + 
+ # scale_x_log10() + 
+ # geom_jitter(alpha = 0.5, color = "#BC8F8F")
 ```
 (we don't have to use this graph - I'm just curious about the log transformed relationship)
 
-=======
-Write a paragraph to describe the relationship between mental health access and happiness/suicide (do we need to log transform the axis?)
+
+How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of mental health units in general hospitals per 100,000. Because this variable is highly right-skewed, we log it to better visualize the relationship.
+
+The two plots reveal that mental health access appears to have a stronger relationship with happiness than with the suicide death rate. The error bar on the regression line for the suicide rate shows that the trend could be flat or even negative, rather than the small positive relationship seen here. The stronger relationship between mental health access and happiness is unsurprising. Greater access to mental healthcare may increase happiness, or another factor, such as a country's wealth, may connect the two.
+
 ```{r warning=FALSE, message=FALSE}
 #side-by-side comparison of mental health access versus happiness/suicide rate
 
@@ -223,20 +240,22 @@ happiness_vs_health <- countries %>%
   ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = happiness_score), na.rm = TRUE) +
   geom_point(color = "darkorchid2") +
   geom_smooth(method=lm, color = "darkorchid4") +
+  scale_x_log10() +
   theme_bw() +
-  labs(x = "Mental Health Units in General Hospitals per 100,000",
+  labs(x = "(Log of) Mental Health Units in General Hospitals per 100,000",
        y = "Happiness Score (2016)",
-       title = "Mental Health access versus Happiness Score")
+       title = "Log of Mental Health access versus Happiness Score")
 
 suicide_vs_health <- countries %>%
   filter(year == 2016) %>%
   ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = sdr), na.rm = TRUE) +
   geom_point(color = "royalblue2") +
   geom_smooth(method=lm, color = "royalblue4") +
+  scale_x_log10() +
   theme_bw() +
-  labs(x = "Mental Health Units in General Hospitals per 100,000",
+  labs(x = "(Log of) Mental Health Units in General Hospitals per 100,000",
        y = "Suicide Death Rate (2016)",
-       title = "Mental Health access versus Suicide Death Rate")
+       title = "Log of Mental Health access versus Suicide Death Rate")
 
 happiness_vs_health
 suicide_vs_health
