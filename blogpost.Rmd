@@ -41,7 +41,7 @@ suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statisti
 #time_series_deaths <- read.csv("")
 ```
 
-First we needed to standardize the data across each year. We removed some columns, like region and the data authors's "dystopia" measure, which were unhelpful for our analysis. Some years included error bounds on the country's overall happiness score, while others didn't. Furthermore, the names and orders of the variables changed from year to year. We inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one dataset.
+First we needed to standardize the data across each year. We removed some columns, like `region` and the data authors' `dystopia` measure, which were unhelpful for our analysis. Some years included error bounds on the country's overall happiness score, while others didn't. Furthermore, the names and orders of the variables changed from year to year. We inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one dataset.
 
 ```{r warning=FALSE, message=FALSE}
 
@@ -151,7 +151,7 @@ countries <- happiness %>%
   
 ```
 
-So, how happy are countries overall? The World Happiness Report calculates each country's happiness score by using survey data. Citizens of each country are asked where their own life ranks on a scale of 1 to 10, with 10 being the best life possible and 0 being the worst life possible. Their responses are weighted to generate a national score. Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than in the least happy countries.
+So, how happy are countries overall? The World Happiness Report calculates each country's happiness score by using survey data. Citizens of each country are asked where their own life ranks on a scale of 1 to 10, with 10 being the best life possible and 0 being the worst life possible. Their responses are weighted to generate a national score (See Table 1). Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than those in the least happy countries.
 
 ```{r}
 happiness_summary <- countries %>%
@@ -160,60 +160,79 @@ options(knitr.table.format = "html")
 kable(happiness_summary, digits = 2, 
       col.names = c("Mean", "Median", 
                     "Standard Dev.", "Minimum", "Maximum"),
-      caption = "Summary Statistics of National Happiness Scores")
+      caption = "Table 1. Summary Statistics of National Happiness Scores")
 ```
-## A first look at the World Happiness Ranking
+## A First Look at the World Happiness Ranking
 
-Write a paragraph to explain the processes of averaging the happiness scores across the years and briefly discuss the most happy vs the least happy countries (maybe map another variable too?). 
-```{r fig.width= 12, fig.height = 30}
+  We want to directly visualize the world happiness ranking using a **diverging bar chart**, which is great for illustrating the spread of negative and positive values. 
+  
+  First, we created a new dataframe `avg_happiness` that contains the average happiness score for every country from 2015 to 2019.
+```{r}
 avg_happiness <- countries %>%
   group_by(country) %>%
   summarize(avg_happiness = mean(happiness_score)) %>%
   as.data.frame()
+```
 
-#make diverging barcharts
+  Next, we created a new column `happiness_z` that contains the normalized happiness score ($z = (x-\mu)/ \sigma$) for each country, and another column `happiness_type` to indicate which country is above or below 0 using `ifelse()`.
+
+```{r}
 avg_happiness$happiness_z <- round((avg_happiness$avg_happiness- 
                                 mean(avg_happiness$avg_happiness))/sd(avg_happiness$avg_happiness), 2)
 avg_happiness$happiness_type <- ifelse(avg_happiness$happiness_z < 0, "below", "above")
+```
+
+We also sorted the columns by the happiness score and converted the column `country` to factor to retain sorted order in plot.
+```{r}
 avg_happiness <- avg_happiness[order(avg_happiness$happiness_z), ]
 avg_happiness$country <- factor(avg_happiness$country, levels = unique(avg_happiness$country))
+```
 
+Now, let's visualize the diverging bars using `geom_bar()`! 
+```{r fig.width = 10, fig.height = 25}
 happy_plot <- ggplot(avg_happiness, aes(x = country, y = happiness_z, label = happiness_z)) +
          geom_bar(stat = "identity", aes(fill = happiness_type)) +
          scale_fill_manual(name="Happiness Score", 
                     labels = c("Above Average", "Below Average"), 
                     values = c("above"="#DB7093", "below"="#D8BFD8")) + 
          coord_flip() +
-         theme_bw() +
          theme_fivethirtyeight() + 
          labs(title = "Average of World Happiness 2015-2019")
 
 happy_plot
 ```
 
-Write a paragraph to describe the change in suicide rate/happiness by continent.
+## Change in world happiness and suicide rate from 2015 to 2017
 
+Then, we wanted to create a **scatterplot** to visualize (1) the change in world happiness and suicide rate from 2015 to 2017 by continent (we don't have data for suicide rate after 2017) and (2) the relationship between happiness rating and suicide rate.
+
+First, we used the library `countrycode` to create a new variable with the name of the continent to which each country belongs.
 ```{r warning=FALSE, message=FALSE}
 countries$continent <- countrycode(sourcevar = countries[, "country"],
                             origin = "country.name",
                             destination = "continent") 
+```
 
+```{r echo = FALSE}
 # manually assign the continent name to Kosovo
 countries[countries$country =="Kosovo", "continent"] <- "Europe"
+```
 
+Then, we used `filter()` to only include data from 2015, 2016, and 2017, and visualized the relationship between happiness and suicide using `geom_point()`. We also made use of the function `ggplotly()` from the interative graphing library `plotly` to add a slider that illustrates the change over the years.
+```{r}
 # create a scatterplot to visualize the relationship between happiness and suicide
-suicide_happiness <- countries %>% 
+suicide_happiness_plot <- countries %>% 
   filter(year %in% c(2015, 2016, 2017)) %>%
   ggplot(aes(x = happiness_score, y = sdr, 
             color = continent, frame = year, ids = country)) +
-  geom_point(aes(size = life_expectancy), alpha = 0.7) +
+  geom_point(aes(size = 1, alpha = 0.7)) +
   scale_x_log10() +
   labs(x = "Happiness Score", y = "Suicide death rate per 100,000",
        size = NULL, color = "Continent") +
   theme_minimal() +
   scale_color_manual(values = c("#DEB887", "#CD5C5C", "#FFD700", "#ADD8E6", "#9ACD32")) 
 
-ggplotly(suicide_happiness)
+ggplotly(suicide_happiness_plot)
 ```
 
 
@@ -227,6 +246,8 @@ ggplotly(suicide_happiness)
 ```
 (we don't have to use this graph - I'm just curious about the log transformed relationship)
 
+
+## Mental health access, happiness, and suicide
 
 How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of mental health units in general hospitals per 100,000. Because this variable is highly right-skewed, we log it to better visualize the relationship.
 
