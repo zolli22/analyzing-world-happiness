@@ -242,7 +242,7 @@ ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country
   scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
   #theme(axis.text.x = element_text(angle = 270, hjust = 0))+
   scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "Generosity", "Healthy life\n expectancy\n at birth", "Perceptions\n of corruption"))+
-  labs(x="Measurement Category")
+  labs(x="Measurement Category", y="Importance score")
 
 
 ```
