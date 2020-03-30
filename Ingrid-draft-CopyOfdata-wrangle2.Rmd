@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-
+library(readr)
 library(tidyverse)
 library(maps)
 library(ggplot2)
@@ -27,7 +27,7 @@ happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/ma
 happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPJDSBHOCDJ3XFEZGK6PZADI")
 happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNLSUG5QK23B6O6CWXS6PZAFA")
 happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNJIBN65O6CBRQRR2726PZAFW")
-happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNO6U5A4PHJ3QJBMZTS6PZAGM")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=AOPH4H73TGOVOYMXGDDHXAS6RN42W")
 mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNOJDJM2QZZHRZY6XRC6PZAIA")
 suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNKAB4OYFH5KITURBOK6PZAJG")
 time_series_deaths <- read.csv("")
@@ -228,29 +228,26 @@ happiness_vs_health
 suicide_vs_health
 
 ```
+##Contributions to happiness
+
+What factors contribute to happiness? We wanted to explore the different contributors to the happiness score and how they vary between the five most happy countries and the five least happy countries. For this, we're only looking at the data from 2019. First, we used `filter()` to select the five happiest and five least happy countries that we wanted to look at. Then we pivoted the 2019 dataset so the individual measurements that contribute to the overall happiness measurement (**family, freedom, economy, generosity, health,** and **trust**) would be observations and not variables. Finally, we made country name a factor so when we graph this data, the countries are still ordered by happiness rank. 
+
+This graph, which is faceted by measurement type and color coded by country, examines the extent to which the following factors contribute to the overall happiness score for a country: **Social support**, **Freedom to make life choices**, **GDP per capita**, **Generosity**, **Healthy life expectancy at birth**, and **Perception of corruption**. This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much less of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**. This data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries. Since GDP and life expectancy are fact based measurements rather than how the residents of the country feel, I think that social support is the most important factor contributing to the happiness of countries.
+
+More information on each of the factors that contribute to the happiness measurement can be found on the World Happiness Report (https://worldhappiness.report/ed/2019/changing-world-happiness/#technical-box-detailed-information-about-each-of-the-predictors-in-table).
 ```{r}
 #the weights of the different contributors to happiness and how they vary from the top five most happy countries to the five least happy countries
 
 top_bottom_2019_happiness<-happiness_2019 %>%
   filter(happiness_rank <= 5 | happiness_rank >= 152) %>% #grab top and bottom 5 countries by happiness rank
-  pivot_longer(cols=c(family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
+  pivot_longer(cols=c(gdp, family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
   mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands", "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
-
-ggplot(top_bottom_2019_happiness, mapping=aes(x=country, y=values, fill=category))+
-  geom_col(position="dodge", color="black", size=.25)+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
-  scale_x_discrete(labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  scale_fill_discrete(labels = c("Social support", "Freedom to make\n life choices", "Generosity", "Healthy life expectancy\n at birth", "Perceptions of \n corruption"))+
-  labs(x="Country (with rank)")
 
 ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country))+
   geom_col(position="dodge", color="black", size=0.25)+
   theme_bw()+
   scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  theme(axis.text.x = element_text(angle = 270, hjust = 0))+
-  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "Generosity", "Healthy life\n expectancy\n at birth", "Perceptions\n of corruption"))+
-  labs(x="Measurement Category")
-
+  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "GDP\n per capita" , "Generosity", "Healthy life\n expectancy\n at birth", "Perception\n of corruption"))+
+  labs(x="Measurement Category", y="Importance score")
 
 ```
