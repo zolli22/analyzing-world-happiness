@@ -26,7 +26,7 @@ happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/ma
 happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPJDSBHOCDJ3XFEZGK6PZADI")
 happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNLSUG5QK23B6O6CWXS6PZAFA")
 happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNJIBN65O6CBRQRR2726PZAFW")
-happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNO6U5A4PHJ3QJBMZTS6PZAGM")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=AOPH4H73TGOVOYMXGDDHXAS6RN42W")
 mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNOJDJM2QZZHRZY6XRC6PZAIA")
 suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNKAB4OYFH5KITURBOK6PZAJG")
 time_series_deaths <- read.csv("")
