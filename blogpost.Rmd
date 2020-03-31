@@ -286,19 +286,26 @@ suicide_vs_health
 
 ##What Contributes to Happiness?
 
+##Contributions to happiness
+
+What factors contribute to happiness? We wanted to explore the different contributors to the happiness score and how they vary between the five most happy countries and the five least happy countries. For this, we're only looking at the data from 2019. First, we used `filter()` to select the five happiest and five least happy countries that we wanted to look at. Then we pivoted the 2019 dataset so the individual measurements that contribute to the overall happiness measurement (**family, freedom, economy, generosity, health,** and **trust**) would be observations and not variables. Finally, we made country name a factor so when we graph this data, the countries are still ordered by happiness rank. 
+
+This graph, which is faceted by measurement type and color coded by country, examines the extent to which the following factors contribute to the overall happiness score for a country: **Social support**, **Freedom to make life choices**, **GDP per capita**, **Generosity**, **Healthy life expectancy at birth**, and **Perception of corruption**. This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much less of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**. This data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries. Since GDP and life expectancy are fact based measurements rather than how the residents of the country feel, I think that social support is the most important factor contributing to the happiness of countries.
+
+More information on each of the factors that contribute to the happiness measurement can be found on the World Happiness Report (https://worldhappiness.report/ed/2019/changing-world-happiness/#technical-box-detailed-information-about-each-of-the-predictors-in-table).
 
 
 ```{r}
 top_bottom_2019_happiness<-happiness_2019 %>%
-  filter(happiness_rank <= 5 | happiness_rank >= 152) %>% #grab top and bottom 5 countries by happiness rank
-  pivot_longer(cols=c(family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
+  filter(happiness_rank <= 5 | happiness_rank >= 152) %>% 
+  pivot_longer(cols=c(gdp, family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
   mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands", "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
 
 ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country))+
   geom_col(position="dodge", color="black", size=0.25)+
   theme_bw()+
   scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "Generosity", "Healthy life\n expectancy\n at birth", "Perceptions\n of corruption"))+
+  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "GDP\n per capita" , "Generosity", "Healthy life\n expectancy\n at birth", "Perception\n of corruption"))+
   labs(x="Measurement Category", y="Importance score")
 ```
 We also need a table somewhere in our blogpost.
