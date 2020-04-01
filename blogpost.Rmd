@@ -331,23 +331,10 @@ ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country
   xlab("Measurement Category") +ylab("Importance score") +
   theme_minimal()
   
-
 ```
 
 This graph, which is faceted by measurement type and color coded by country, examines the extent to which the following factors contribute to the overall happiness score for a country: **social support**, **freedom to make life choices**, **GDP per capita**, **generosity**, **healthy life expectancy at birth**, and **perception of corruption**. 
 
-This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much *less* of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**.
-
-These data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries. Since GDP and life expectancy are objective measurements rather than how the residents of the country feel, social support might be the most important subjective factor contributing to the happiness of countries.
+This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much *less* of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**. These data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries.
 
 If you're interested to explore more about happiness-related data, more information on each of the factors that contribute to the happiness measurement can be found on the World Happiness Report (https://worldhappiness.report/ed/2019/changing-world-happiness/#technical-box-detailed-information-about-each-of-the-predictors-in-table).
-
-
-
-
-
-
-
-
-
-
