@@ -49,7 +49,7 @@ mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Sta
 suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=AOPIY2SKDTS6RF5OYLUD4NK6RTWD4")
 ```
 
-First, we needed to **standardize the happiness data** across each year. We removed some columns such as `region` and `dystopia` that were unhelpful for our analysis. Considering that some years included error bounds on the country's overall happiness score while others didn't, and the names and orders of the variables changed from year to year, we inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one `happiness` dataset.
+First, we needed to **standardize the happiness data** across each year. We removed some columns such as `region` and `dystopia` that were unhelpful for our analysis. We inserted NAs in some years for variables that were not included every year. Then we made sure the variables had standarized names before combining each year into one `happiness` dataset.
 
 ```{r warning=FALSE, message=FALSE}
 
@@ -175,7 +175,7 @@ countries[countries$country =="Kosovo", "continent"] <- "Europe"
 
 ### So, how happy are countries overall? 
 <a href = "https://worldhappiness.report">The World Happiness Report</a> calculates each country's happiness score by using survey data, in which citizens of each country are asked where their own life ranks on a scale of 1 to 10, with **<span style="color:indianRed"> 10 being the best life possible </span>** and **<span style="color:darkSlateBlue"> 0 being the worst life possible</span>**. Their responses are weighted to generate a national score (See Table 1).
-  Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than those in the least happy countries.
+  Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum shows that people in the happiest countries are much happier than those in the least happy countries.
 
 ```{r}
 happiness_summary <- countries %>%
@@ -267,9 +267,9 @@ As for the general relationship between suicide and happiness, the flat black li
 
 ## Mental health access, happiness, and suicide
 
-How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of `mental health units in general hospitals per 100,000`. Because this variable is highly right-skewed, we log it to better visualize the relationship.
+How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of `mental health units in general hospitals per 100,000`. Because most countries have few units, while a few have many, we log it to better visualize the relationship.
 
-The two plots reveal that mental health access appears to have a **stronger** relationship with happiness than with the suicide death rate. The error bar on the regression line for the suicide rate shows that the trend could be flat or even negative, rather than the small positive relationship seen here. The stronger relationship between mental health access and happiness is unsurprising. Greater access to mental healthcare may increase happiness, or another factor, such as a country's wealth, may connect the two.
+The two plots reveal that mental health access appears to have a **stronger** relationship with happiness than with the suicide death rate. The error bar on the trend line for the suicide rate shows that the two variables could easily be unrelated. The stronger relationship between mental health access and happiness is unsurprising. Greater access to mental healthcare may increase happiness, or another factor, such as a country's wealth, may connect the two.
 
 ```{r warning=FALSE, message=FALSE}
 happiness_vs_health <- countries %>%
