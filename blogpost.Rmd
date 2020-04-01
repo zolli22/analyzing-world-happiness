@@ -37,7 +37,7 @@ library(gridExtra)
 library(colorspace)
 ```
 
-From <a href ="https://www.kaggle.com/unsdsn/world-happiness">Kaggle</a>, we obtained our happiness datasets across 5 years (2015-2019) including key variables such as happiness score, GDP, life expectacny, and generosity. Our `suicide_death_rates` dataset was obtained from <a href ="https://ourworldindata.org/suicide">Our World in Data</a> that contains suicide death rates per 100,000 people (sdr) with the corresponding countries and years. Our `mental_health_facilities` dataset was obtained from ___ that contains variables related to mental health access (e.g. number of mental hospitals per 100000 population.
+From <a href ="https://www.kaggle.com/unsdsn/world-happiness">Kaggle</a>, we obtained our happiness datasets across 5 years (2015-2019) including key variables such as happiness score, GDP, life expectacny, and generosity. Our `suicide_death_rates` dataset was obtained from <a href ="https://ourworldindata.org/suicide">Our World in Data</a> that contains suicide death rates per 100,000 people (sdr) with the corresponding countries and years. Our `mental_health_facilities` dataset was obtained from <a href="https://www.who.int/data/gho/data/themes/topics/indicator-groups/indicator-group-details/GHO/facilities">the WHO</a> that contains variables related to mental health access (e.g. number of mental hospitals per 100000 population.
 
 ```{r warning=FALSE, message=FALSE}
 happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=AOPIY2TJVKMN7KRNG3BIQRS6RTV3I")
@@ -161,6 +161,7 @@ countries <- happiness %>%
 ```
 
 Finally, using the `countrycode` library, we created a new variable `continent` with the name of the continent to which each country belongs.
+
 ```{r warning=FALSE, message=FALSE}
 countries$continent <- countrycode(sourcevar = countries[, "country"],
                             origin = "country.name",
