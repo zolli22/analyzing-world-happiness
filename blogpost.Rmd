@@ -1,5 +1,5 @@
 ---
-title: "Analyzing World Happiness"
+title: "Analyzing World Happiness: How happy is your country?"
 author: "Ingrid Zoll, Christy Lei & Nat Rubin"
 date: "`r Sys.Date()`"
 output:
@@ -8,14 +8,23 @@ output:
     highlight: github
     
 ---
-(feel free to edit the paragraphs here!)
+<style type="text/css">
 
-This year the **International Day of Happiness** was celebrated on March 20 with the theme "Happiness For All, Together” while (ironically) the world is coping with a stressful pandemic. But don't let that get on your nerves too much - we are about look at some happiness-related data to (hopefully) get some clues as to why some countries are happier than others.
+body{ /* Normal */
+      font-size: 11px;
+  }
+  
+h1.title {
+  font-size: 32px;
+}
 
-Specifically, we want to analyze and visualize the relationships between **happiness score**, **suicide rates**, and **mental health access** for all the countries in the recent years (2015-2019).
+</style>
+
+This year, the **International Day of Happiness** was celebrated on March 20 with the theme "Happiness For All, Together" while (ironically) the world is coping with a stressful pandemic. But don't let the bad news get on your nerves too much — we are about to analyze some happiness-related data to see where your country ranks in the world and get some clues as to why some countries are happier than others. 
+
+Specifically, we want to analyze and visualize the relationships between **happiness score**, **suicide rates**, and **mental health access** for all the countries in the recent years, namely from 2015 to 2019.
 
 ## Data Wrangling
-
 ```{r setup, warning=FALSE, message=FALSE}
 library(knitr)
 library(tidyverse)
@@ -25,23 +34,22 @@ library(ggthemes)
 library(plotly)
 library(countrycode)
 library(gridExtra)
-
+library(colorspace)
 ```
 
-Describe our data sources: e.g. our five happiness datasets (2015-2019) are obtained from Kaggle (https://www.kaggle.com/unsdsn/world-happiness)...
+From <a href ="https://www.kaggle.com/unsdsn/world-happiness">Kaggle</a>, we obtained our happiness datasets across 5 years (2015-2019) including key variables such as happiness score, GDP, life expectacny, and generosity. Our `suicide_death_rates` dataset was obtained from <a href ="https://ourworldindata.org/suicide">Our World in Data</a> that contains suicide death rates per 100,000 people (sdr) with the corresponding countries and years. Our `mental_health_facilities` dataset was obtained from ___ that contains variables related to mental health access (e.g. number of mental hospitals per 100000 population.
 
 ```{r warning=FALSE, message=FALSE}
-happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=ANDSWNJBOL4TOHNDMTCN2B26PZABE")
-happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=ANDSWNPJDSBHOCDJ3XFEZGK6PZADI")
-happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=ANDSWNLSUG5QK23B6O6CWXS6PZAFA")
-happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=ANDSWNJIBN65O6CBRQRR2726PZAFW")
-happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=ANDSWNO6U5A4PHJ3QJBMZTS6PZAGM")
-mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=ANDSWNOJDJM2QZZHRZY6XRC6PZAIA")
-suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=ANDSWNKAB4OYFH5KITURBOK6PZAJG")
-#time_series_deaths <- read.csv("")
+happiness_2015 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2015.csv?token=AOPIY2TJVKMN7KRNG3BIQRS6RTV3I")
+happiness_2016 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2016.csv?token=AOPIY2SCJCOYE5VZGYBVPUS6RTV4O")
+happiness_2017 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2017.csv?token=AOPIY2XPRH43ZYFO3KZYZLK6RTV6K")
+happiness_2018 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2018.csv?token=AOPIY2Q3LYBDQJULX4GM2S26RTV7S")
+happiness_2019 <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/2019.csv?token=AOPIY2SGUI2JYL3MQBOHORS6RTWAK")
+mental_health_facilities <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/mental_health_facilities.csv?token=AOPIY2XOIZNHJUK7EZFWCXC6RTWCI")
+suicide_death_rates <- read.csv("https://raw.githubusercontent.com/Reed-Statistics/math241S20PostGrp4/master/suicide-death-rates.csv?token=AOPIY2SKDTS6RF5OYLUD4NK6RTWD4")
 ```
 
-First we needed to standardize the data across each year. We removed some columns, like `region` and the data authors' `dystopia` measure, which were unhelpful for our analysis. Some years included error bounds on the country's overall happiness score, while others didn't. Furthermore, the names and orders of the variables changed from year to year. We inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one dataset.
+First, we needed to **standardize the happiness data** across each year. We removed some columns such as `region` and `dystopia` that were unhelpful for our analysis. Considering that some years included error bounds on the country's overall happiness score while others didn't, and the names and orders of the variables changed from year to year, we inserted NAs where it was necessary and made sure each year had the same variables with easily workable names before combining them into one `happiness` dataset.
 
 ```{r warning=FALSE, message=FALSE}
 
@@ -134,9 +142,10 @@ happiness_2019 <- happiness_2019 %>%
          upper_whisker = 12)
   
 happiness <- do.call("rbind", list(happiness_2015, happiness_2016, happiness_2017, happiness_2018, happiness_2019))
+
 ```
 
-We then added suicide rates and mental health access to the dataset. Unfortunately, mental health access was only collected in one year, so that value remains constant across the years in each country.
+We then added `suicide_death_rates` and `mental_health_facilities` to the `happiness` dataset to create a new dataset `countries`. Unfortunately, our `mental_health_facitilies` dataset was only collected in one year, so that value remains constant across the years in each country.
 
 ```{r warning=FALSE}
 suicide_death_rates <- suicide_death_rates %>%
@@ -148,65 +157,10 @@ countries <- happiness %>%
   left_join(suicide_death_rates, by = c(c("country" = "Entity"),
                                         c("year" = "Year"))) %>%
   select(-13)
-  
+
 ```
 
-So, how happy are countries overall? The World Happiness Report calculates each country's happiness score by using survey data. Citizens of each country are asked where their own life ranks on a scale of 1 to 10, with 10 being the best life possible and 0 being the worst life possible. Their responses are weighted to generate a national score (See Table 1). Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than those in the least happy countries.
-
-```{r}
-happiness_summary <- countries %>%
-  summarize(mean(happiness_score), median(happiness_score), sd(happiness_score), min(happiness_score),  max(happiness_score))
-options(knitr.table.format = "html")
-kable(happiness_summary, digits = 2, 
-      col.names = c("Mean", "Median", 
-                    "Standard Dev.", "Minimum", "Maximum"),
-      caption = "Table 1. Summary Statistics of National Happiness Scores")
-```
-## A First Look at the World Happiness Ranking
-
-  We want to directly visualize the world happiness ranking using a **diverging bar chart**, which is great for illustrating the spread of negative and positive values. 
-  
-  First, we created a new dataframe `avg_happiness` that contains the average happiness score for every country from 2015 to 2019.
-```{r}
-avg_happiness <- countries %>%
-  group_by(country) %>%
-  summarize(avg_happiness = mean(happiness_score)) %>%
-  as.data.frame()
-```
-
-  Next, we created a new column `happiness_z` that contains the normalized happiness score ($z = (x-\mu)/ \sigma$) for each country, and another column `happiness_type` to indicate which country is above or below 0 using `ifelse()`.
-
-```{r}
-avg_happiness$happiness_z <- round((avg_happiness$avg_happiness- 
-                                mean(avg_happiness$avg_happiness))/sd(avg_happiness$avg_happiness), 2)
-avg_happiness$happiness_type <- ifelse(avg_happiness$happiness_z < 0, "below", "above")
-```
-
-We also sorted the columns by the happiness score and converted the column `country` to factor to retain sorted order in plot.
-```{r}
-avg_happiness <- avg_happiness[order(avg_happiness$happiness_z), ]
-avg_happiness$country <- factor(avg_happiness$country, levels = unique(avg_happiness$country))
-```
-
-Now, let's visualize the diverging bars using `geom_bar()`! 
-```{r fig.width = 10, fig.height = 25}
-happy_plot <- ggplot(avg_happiness, aes(x = country, y = happiness_z, label = happiness_z)) +
-         geom_bar(stat = "identity", aes(fill = happiness_type)) +
-         scale_fill_manual(name="Happiness Score", 
-                    labels = c("Above Average", "Below Average"), 
-                    values = c("above"="#DB7093", "below"="#D8BFD8")) + 
-         coord_flip() +
-         theme_fivethirtyeight() + 
-         labs(title = "Average of World Happiness 2015-2019")
-
-happy_plot
-```
-
-## Change in world happiness and suicide rate from 2015 to 2017
-
-Then, we wanted to create a **scatterplot** to visualize (1) the change in world happiness and suicide rate from 2015 to 2017 by continent (we don't have data for suicide rate after 2017) and (2) the relationship between happiness rating and suicide rate.
-
-First, we used the library `countrycode` to create a new variable with the name of the continent to which each country belongs.
+Finally, using the `countrycode` library, we created a new variable `continent` with the name of the continent to which each country belongs.
 ```{r warning=FALSE, message=FALSE}
 countries$continent <- countrycode(sourcevar = countries[, "country"],
                             origin = "country.name",
@@ -218,94 +172,181 @@ countries$continent <- countrycode(sourcevar = countries[, "country"],
 countries[countries$country =="Kosovo", "continent"] <- "Europe"
 ```
 
-Then, we used `filter()` to only include data from 2015, 2016, and 2017, and visualized the relationship between happiness and suicide using `geom_point()`. We also made use of the function `ggplotly()` from the interative graphing library `plotly` to add a slider that illustrates the change over the years.
+### So, how happy are countries overall? 
+<a href = "https://worldhappiness.report">The World Happiness Report</a> calculates each country's happiness score by using survey data, in which citizens of each country are asked where their own life ranks on a scale of 1 to 10, with **<span style="color:indianRed"> 10 being the best life possible </span>** and **<span style="color:darkSlateBlue"> 0 being the worst life possible</span>**. Their responses are weighted to generate a national score (See Table 1).
+  Overall, people view their lives as being of average to slightly-above average quality. The wide range between the maximum and minimum are telling: people in the happiest countries are much, much happier than those in the least happy countries.
+
 ```{r}
-# create a scatterplot to visualize the relationship between happiness and suicide
+happiness_summary <- countries %>%
+  summarize(mean(happiness_score), median(happiness_score), 
+            sd(happiness_score), min(happiness_score),  max(happiness_score))
+options(knitr.table.format = "html")
+kable(happiness_summary, digits = 2, 
+      col.names = c("Mean", "Median", 
+                    "Standard Dev.", "Minimum", "Maximum"),
+      caption = "Table 1. Summary Statistics of National Happiness Scores")
+```
+
+## A First Look at the World Happiness Ranking
+
+  Then, we wanted to directly visualize the world happiness ranking using a **diverging bar chart**, which is great for comparing variations above and below an average value or illustrating the spread of negative and positive values in a dataset.
+  
+  First, we created a new data frame `avg_happiness` that contains the **average happiness score** for every country from 2015 to 2019.
+```{r}
+avg_happiness <- countries %>%
+  group_by(country) %>%
+  summarize(avg_happiness = mean(happiness_score)) %>%
+  as.data.frame()
+```
+
+  Next, we created a new column `happiness_z` that contains the normalized happiness score ($z = (x-\mu)/ \sigma$) for each country. To clarify, the z-score would allow us to show how far the happiness score for one country varies from the mean in terms of the standard deviation. We also added another column `happiness_type` to indicate whether the country has the normalized happiness score above or below 0. 
+
+```{r}
+avg_happiness$happiness_z <- round((avg_happiness$avg_happiness- 
+                                mean(avg_happiness$avg_happiness))/sd(avg_happiness$avg_happiness), 2)
+avg_happiness$happiness_type <- ifelse(avg_happiness$happiness_z < 0, "below", "above")
+```
+
+Finally, we sorted the columns by the happiness score and converted the column `country` to factor to keep sorted order in plot.
+```{r}
+avg_happiness <- avg_happiness[order(avg_happiness$happiness_z), ]
+avg_happiness$country <- factor(avg_happiness$country, levels = unique(avg_happiness$country))
+```
+
+Now, let's visualize the ranking using the diverging bars!
+```{r fig.width = 10, fig.height = 25}
+happy_plot <- ggplot(avg_happiness, aes(x = country, y = happiness_z, label = happiness_z)) +
+         geom_bar(stat = "identity", aes(fill = happiness_type)) +
+         scale_fill_manual(name="Happiness Score", 
+                    labels = c("Above Average", "Below Average"), 
+                    values = c("above"="paleVioletRed", "below"="thistle")) + 
+         coord_flip() +
+         labs(title = "Average of World Happiness 2015-2019", y = "Normalized happiness score") +
+         theme_minimal() + 
+         theme(legend.position = "bottom")
+
+happy_plot
+```
+
+##Change in happiness and suicide rate from 2015 to 2017
+
+Are countries getting happier over the years? To answer this, we wanted to create a **scatterplot** to visualize (1) the change in world happiness and suicide death rate from 2015 to 2017, by continent and (2) the relationship between happiness score and suicide death rate. Since we don't have access to information about suicide rate after 2017, we only included data from 2015 to 2017.
+
+First, we selected data from 2015, 2016, and 2017 to calculate the mean of happiness score and suicide death rates for every continent. Then, we plotted the scores of **individual countries (small circle)** with **continent means (large circle)** to visualize the relationship between happiness and suicide. We also made use of the function `ggplotly()` from the interative graphing library `plotly` to add a slider that illustrates the change over the years.
+```{r warning=FALSE, message=FALSE}
+happy_15_to_17 <- countries %>% 
+        filter(is.na(sdr) == FALSE) %>%
+        filter(year %in% c(2015, 2016, 2017)) %>%
+        group_by(continent, year) %>% 
+        summarise(happiness_score = mean(happiness_score),
+                  sdr  = mean(sdr))
+
 suicide_happiness_plot <- countries %>% 
+  filter(is.na(sdr) == FALSE) %>%
   filter(year %in% c(2015, 2016, 2017)) %>%
   ggplot(aes(x = happiness_score, y = sdr, 
-            color = continent, frame = year, ids = country)) +
-  geom_point(aes(size = 1, alpha = 0.7)) +
-  scale_x_log10() +
+            color = continent, frame = year)) +
+  geom_point(aes(label = country, alpha = 0.9, size = 2)) +
+  geom_point(data = happy_15_to_17, aes(size = 2.5, label = continent)) +
+  geom_smooth(inherit.aes = FALSE, aes(x = happiness_score, y = sdr), 
+              method = "lm", se = FALSE, color = "black", size = 0.5) +
   labs(x = "Happiness Score", y = "Suicide death rate per 100,000",
-       size = NULL, color = "Continent") +
+       size = NULL, alpha = NULL, color = "Continent") +
   theme_minimal() +
-  scale_color_manual(values = c("#DEB887", "#CD5C5C", "#FFD700", "#ADD8E6", "#9ACD32")) 
+  scale_color_manual(values = c("maroon", "salmon", "gold", "cornflowerblue", "darkSlateBlue")) 
 
-ggplotly(suicide_happiness_plot)
+ggplotly(suicide_happiness_plot, tooltip = c("label", "x", "y")) 
+
 ```
+The plot showed that there isn't a huge change in mean happiness score and suicide rate for all continents, but within each continent, there seems to be a high variability and change among different countries every year. 
 
+Africa consistently has the lowest happiness score with a high mean of suicide death rate throughout the years. However, Europe, with a relatively high average happiness score, has the highest suicide death rate compared to other continents. Similarly, Oceania has the highest happiness score with high suicide rate. Americas have a very high average happiness score and a relatively lower suicide death rate, and Asia has a medium high average happiness score with the lowest suicide death rate.
 
-
-```{r warning=FALSE, message=FALSE}
-# create a scatterplot that shows the relationship between mental health facilities and happiness scores
-# countries %>% ggplot(aes(x = happiness_score, y = Mental.hospitals..per.100.000.population.)) +
- # scale_y_log10() + 
- # scale_x_log10() + 
- # geom_jitter(alpha = 0.5, color = "#BC8F8F")
-```
-(we don't have to use this graph - I'm just curious about the log transformed relationship)
-
+As for the general relationship between suicide and happiness, the flat black line indicates that there seems to be little to no correlation.
 
 ## Mental health access, happiness, and suicide
 
-How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of mental health units in general hospitals per 100,000. Because this variable is highly right-skewed, we log it to better visualize the relationship.
+How does mental health access factor into happiness and suicide? We used the indiciator of mental health access with the fewest NAs, which is the number of `mental health units in general hospitals per 100,000`. Because this variable is highly right-skewed, we log it to better visualize the relationship.
 
-The two plots reveal that mental health access appears to have a stronger relationship with happiness than with the suicide death rate. The error bar on the regression line for the suicide rate shows that the trend could be flat or even negative, rather than the small positive relationship seen here. The stronger relationship between mental health access and happiness is unsurprising. Greater access to mental healthcare may increase happiness, or another factor, such as a country's wealth, may connect the two.
+The two plots reveal that mental health access appears to have a **stronger** relationship with happiness than with the suicide death rate. The error bar on the regression line for the suicide rate shows that the trend could be flat or even negative, rather than the small positive relationship seen here. The stronger relationship between mental health access and happiness is unsurprising. Greater access to mental healthcare may increase happiness, or another factor, such as a country's wealth, may connect the two.
 
 ```{r warning=FALSE, message=FALSE}
-#side-by-side comparison of mental health access versus happiness/suicide rate
-
 happiness_vs_health <- countries %>%
   filter(year == 2016) %>%
-  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = happiness_score), na.rm = TRUE) +
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population.,
+             y = happiness_score), na.rm = TRUE) +
   geom_point(color = "darkorchid2") +
   geom_smooth(method=lm, color = "darkorchid4") +
   scale_x_log10() +
-  theme_bw() +
+  theme_minimal() +
   labs(x = "(Log of) Mental Health Units in General Hospitals per 100,000",
        y = "Happiness Score (2016)",
        title = "Log of Mental Health access versus Happiness Score")
 
 suicide_vs_health <- countries %>%
   filter(year == 2016) %>%
-  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., y = sdr), na.rm = TRUE) +
+  ggplot(aes(x = Mental.health.units.in.general.hospitals..per.100.000.population., 
+             y = sdr), na.rm = TRUE) +
   geom_point(color = "royalblue2") +
   geom_smooth(method=lm, color = "royalblue4") +
   scale_x_log10() +
-  theme_bw() +
+  theme_minimal() +
   labs(x = "(Log of) Mental Health Units in General Hospitals per 100,000",
        y = "Suicide Death Rate (2016)",
        title = "Log of Mental Health access versus Suicide Death Rate")
 
 happiness_vs_health
 suicide_vs_health
-
 ```
-
 
 ##What Contributes to Happiness?
+What factors contribute to happiness? We wanted to explore the different contributors to the happiness score and how they vary between the **<span style="color:indianRed">five most happy countries</span>** and the **<span style="color:darkSlateBlue">five least happy countries</span>**. For this question, we're only looking at the data from 2019. 
 
-##Contributions to happiness
+First, we used `filter()` to select the five happiest and five least happy countries that we wanted to look at. Then we pivoted the 2019 dataset so the individual measurements (e.g. family, freedom, economy) that contribute to the overall happiness measurement would be observations and not variables. Finally, we made country name a factor so when we graph this data so that the countries are still ordered by happiness rank. 
 
-What factors contribute to happiness? We wanted to explore the different contributors to the happiness score and how they vary between the five most happy countries and the five least happy countries. For this, we're only looking at the data from 2019. First, we used `filter()` to select the five happiest and five least happy countries that we wanted to look at. Then we pivoted the 2019 dataset so the individual measurements that contribute to the overall happiness measurement (**family, freedom, economy, generosity, health,** and **trust**) would be observations and not variables. Finally, we made country name a factor so when we graph this data, the countries are still ordered by happiness rank. 
-
-This graph, which is faceted by measurement type and color coded by country, examines the extent to which the following factors contribute to the overall happiness score for a country: **Social support**, **Freedom to make life choices**, **GDP per capita**, **Generosity**, **Healthy life expectancy at birth**, and **Perception of corruption**. This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much less of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**. This data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries. Since GDP and life expectancy are fact based measurements rather than how the residents of the country feel, I think that social support is the most important factor contributing to the happiness of countries.
-
-More information on each of the factors that contribute to the happiness measurement can be found on the World Happiness Report (https://worldhappiness.report/ed/2019/changing-world-happiness/#technical-box-detailed-information-about-each-of-the-predictors-in-table).
-
-
-```{r}
-top_bottom_2019_happiness<-happiness_2019 %>%
+```{r warning=FALSE, message=FALSE}
+top_bottom_2019_happiness <- happiness_2019 %>%
   filter(happiness_rank <= 5 | happiness_rank >= 152) %>% 
-  pivot_longer(cols=c(gdp, family, life_expectancy, freedom, generosity, trust_corruption), names_to = "category", values_to = "values") %>% 
-  mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands", "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
+  pivot_longer(cols=c(gdp, family, life_expectancy, freedom, generosity, trust_corruption), 
+               names_to = "category", values_to = "values") %>% 
+  mutate(country = factor(country, levels=c("Finland", "Denmark", "Norway", "Iceland", "Netherlands",
+                    "Rwanda", "Tanzania", "Afghanistan", "Central African Republic", "South Sudan")))
 
 ggplot(top_bottom_2019_happiness, mapping=aes(x=category, y=values, fill=country))+
-  geom_col(position="dodge", color="black", size=0.25)+
-  theme_bw()+
-  scale_fill_discrete(name="Country (with rank)", labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)", "Netherlands (5)", "Rwanda (152)", "Tanzania (153)", "Afghanistan (154)", "Central African\n Republic (155)", "South Sudan (156)"))+
-  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", "GDP\n per capita" , "Generosity", "Healthy life\n expectancy\n at birth", "Perception\n of corruption"))+
-  labs(x="Measurement Category", y="Importance score")
+  geom_col(position="dodge", color="black", size=0.25) +
+  theme_fivethirtyeight()+
+  scale_x_discrete(labels = c("Social\n support", "Freedom to\n make life\n choices", 
+                              "GDP\n per capita" , "Generosity", "Healthy life\n expectancy\n at birth",
+                              "Perception\n of corruption")) +
+  scale_fill_discrete_sequential(name = "Country\n (with rank)", palette = "ag_Sunset", 
+                                 labels = c("Finland (1)", "Denmark (2)", "Norway (3)", "Iceland (4)",
+                                            "Netherlands (5)", "Rwanda (152)", "Tanzania (153)",
+                                            "Afghanistan (154)", "Central African\n Republic (155)",
+                                            "South Sudan (156)")) +
+  theme(legend.text = element_text(size = 8.5),
+        legend.direction = "vertical",
+        legend.position = "right") +
+  labs(title = "Contribution of 6 variables to happiness") +
+  xlab("Measurement Category") +ylab("Importance score") +
+  theme_minimal()
+  
+
 ```
-We also need a table somewhere in our blogpost.
+
+This graph, which is faceted by measurement type and color coded by country, examines the extent to which the following factors contribute to the overall happiness score for a country: **social support**, **freedom to make life choices**, **GDP per capita**, **generosity**, **healthy life expectancy at birth**, and **perception of corruption**. 
+
+This chart shows that **social support**, **GDP**, and **healthy life expentancy** seem to be the largest contributors to how happy a country is. Those three categories show the greatest difference between the happiest and least happy countries, whereas there is much *less* of a difference in **freedom to make life choices**, **generosity**, and **perception of corruption**.
+
+These data indicates that happy countries are more socially supportive, have a higher GDP, and have healthier populations than less happy countries. Since GDP and life expectancy are objective measurements rather than how the residents of the country feel, social support might be the most important subjective factor contributing to the happiness of countries.
+
+If you're interested to explore more about happiness-related data, more information on each of the factors that contribute to the happiness measurement can be found on the World Happiness Report (https://worldhappiness.report/ed/2019/changing-world-happiness/#technical-box-detailed-information-about-each-of-the-predictors-in-table).
+
+
+
+
+
+
+
+
+
+
